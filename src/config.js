@@ -1,7 +1,7 @@
 export const documentTypes = [
     { value: "PAN Card", label: "PAN Card" },
     { value: "Aadhaar Card", label: "Aadhaar Card" },
-    { value: "Passport", label: "Passport" },
+    { value: "Marksheet", label: "Marksheet" },
     // Add other document types here
 ];
 export const languageOptions = [

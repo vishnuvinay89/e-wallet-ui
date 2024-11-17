@@ -25,14 +25,14 @@ const Fetch = ({ documentType, onDocumentTypeChange }) => {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate(); // Initialize useNavigate hook for navigation
   const [selectedDocument, setSelectedDocument] = useState(documentType || "");
+  const [docId, setDocId] = useState(""); // Track document ID input
+
   return (
     <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
-      {/* Header */}
       <Header />
 
       <Container sx={{ flexGrow: 1 }}>
         <Box sx={{ mt: 2, mb: 4 }}>
-          {/* Back Button with Navigation */}
           <IconButton onClick={() => navigate("/home")}>
             <ArrowBackIcon />
           </IconButton>
@@ -46,7 +46,6 @@ const Fetch = ({ documentType, onDocumentTypeChange }) => {
         </Box>
 
         {/* Select Document Type */}
-        {/* Title */}
         <Typography
           variant="h6"
           gutterBottom
@@ -55,19 +54,16 @@ const Fetch = ({ documentType, onDocumentTypeChange }) => {
           Select Document Type
         </Typography>
 
-        {/* Document Type Select Field */}
         <FormControl fullWidth sx={{ my: 2 }}>
-          {/* Floating InputLabel */}
           <InputLabel sx={{ fontFamily: "Poppins, sans-serif" }}>
             Select Document Type
           </InputLabel>
           <Select
             value={selectedDocument}
             onChange={(e) => setSelectedDocument(e.target.value)} // Update state when user selects a document type
-            label="Select Document Type" // The label is automatically handled by Material UI
-            sx={{ fontFamily: "Poppins, sans-serif" }} // Ensure Poppins font is applied
+            label="Select Document Type"
+            sx={{ fontFamily: "Poppins, sans-serif" }}
           >
-            {/* Dynamically render MenuItems from documentTypes */}
             {documentTypes.map((doc) => (
               <MenuItem key={doc.value} value={doc.value}>
                 {doc.label}
@@ -75,6 +71,7 @@ const Fetch = ({ documentType, onDocumentTypeChange }) => {
             ))}
           </Select>
         </FormControl>
+
         {/* Document ID Input */}
         <Box sx={{ mb: 3 }}>
           <Typography
@@ -87,6 +84,8 @@ const Fetch = ({ documentType, onDocumentTypeChange }) => {
           <TextField
             fullWidth
             placeholder="Paste Here"
+            value={docId} // Track the document ID input value
+            onChange={(e) => setDocId(e.target.value)} // Update document ID on change
             helperText={
               <Box
                 sx={{
@@ -97,14 +96,13 @@ const Fetch = ({ documentType, onDocumentTypeChange }) => {
               >
                 <Info />
                 <FormHelperText sx={{ ml: 0.4 }}>
-                    Hint Text: Where this ID can be found
+                  Hint Text: Where this ID can be found
                 </FormHelperText>
               </Box>
             }
           />
         </Box>
 
-        {/* Fetch Button */}
         <Button
           variant="contained"
           fullWidth
@@ -120,10 +118,10 @@ const Fetch = ({ documentType, onDocumentTypeChange }) => {
           open={open}
           onClose={() => setOpen(false)}
           documentType={selectedDocument} // Pass the selected document type as a prop
+          docId={docId} // Pass the document ID
         />
       </Container>
 
-      {/* Bottom Navigation Bar */}
       <BottomNavigationBar />
     </Box>
   );

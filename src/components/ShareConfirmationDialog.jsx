@@ -13,19 +13,53 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import axios from 'axios';
 
-const ShareConfirmationDialog = ({ open, onClose, documentType }) => {
-  const [checked, setChecked] = useState(false); // Track checkbox state
+const ShareConfirmationDialog = ({ open, onClose, documentType,docId, file }) => {
+  const [checked, setChecked] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+    const apiUrl =import.meta.env.VITE_APP_API_URL;
+    let response;
+    const ssoId='2fc2411c-a0c9-404d-a13a-408241e81fe2';//actually get the sso id from the local storage
+  const handleAccept = async () => {
+    if (checked) {
+      try {
 
-  const handleAccept = () => {
-    setShowSuccess(true);
-  };
+        if (file) {
 
-  const handleClose = () => {
-    setChecked(false);
-    setShowSuccess(false);
-    onClose();
+            const formData = new FormData();
+            formData.append('sso_id', ssoId);
+            formData.append('doc_type', documentType);
+            formData.append('file', file);
+        
+
+            response = await axios.post(`${apiUrl}/user-docs`, formData, {
+              headers: {
+                'Content-Type': 'multipart/form-data',
+              },
+            });
+          } else {
+
+            const data = new URLSearchParams();
+            data.append('sso_id', ssoId);
+            data.append('doc_type', documentType);
+            data.append('doc_id', docId);
+        
+            // Send the data without file
+            response = await axios.post(`${apiUrl}/user-docs`, data.toString(), {
+              headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+              },
+            });
+          }
+
+        setShowSuccess(true);
+        console.log('Upload successful:', response.data);
+      } catch (error) {
+        console.error('Error during upload:', error);
+        alert('Failed to upload the document. Please try again.');
+      }
+    }
   };
 
   const handleCheckboxChange = (e) => {
@@ -35,7 +69,7 @@ const ShareConfirmationDialog = ({ open, onClose, documentType }) => {
   const ConfirmationContent = () => (
     <>
       <DialogTitle sx={{ pb: 1, pr: 6 }}>
-        <Typography variant="h5" component="div" sx={{ fontFamily: 'Poppins, sans-serif' }}>
+        <Typography variant="h5" sx={{ fontFamily: 'Poppins, sans-serif' }}>
           Share Information
         </Typography>
         <Typography variant="subtitle1" color="text.secondary" sx={{ mt: 1, fontFamily: 'Poppins, sans-serif' }}>
@@ -43,7 +77,7 @@ const ShareConfirmationDialog = ({ open, onClose, documentType }) => {
         </Typography>
         <IconButton
           aria-label="close"
-          onClick={handleClose}
+          onClick={onClose}
           sx={{
             position: 'absolute',
             right: 8,
@@ -59,19 +93,9 @@ const ShareConfirmationDialog = ({ open, onClose, documentType }) => {
           Please provide your consent to share the selected document with your E-Wallet
         </Typography>
 
-        {/* Document Type with Checkbox */}
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-          {/* <Typography variant="subtitle1" sx={{ fontFamily: 'Poppins, sans-serif', mr: 2 }}>
-            Document Type: 
-          </Typography> */}
           <FormControlLabel
-            control={
-              <Checkbox
-                checked={checked}
-                onChange={handleCheckboxChange}
-                sx={{ color: 'primary.main' ,fontFamily: 'Poppins, sans-serif' }}
-              />
-            }
+            control={<Checkbox checked={checked} onChange={handleCheckboxChange} />}
             label={documentType}
           />
         </Box>
@@ -81,8 +105,8 @@ const ShareConfirmationDialog = ({ open, onClose, documentType }) => {
         <Button
           variant="outlined"
           fullWidth
-          onClick={handleClose}
-          sx={{ mr: 1, fontFamily: 'Poppins, sans-serif', borderRadius: 7 }}
+          onClick={onClose}
+          sx={{ mr: 1, fontFamily: 'Poppins, sans-serif' }}
         >
           Deny
         </Button>
@@ -91,8 +115,8 @@ const ShareConfirmationDialog = ({ open, onClose, documentType }) => {
           variant="contained"
           fullWidth
           onClick={handleAccept}
-          disabled={!checked} // Disable the button if checkbox is not checked
-          sx={{ fontFamily: 'Poppins, sans-serif', borderRadius: 7 }}
+          disabled={!checked}
+          sx={{ fontFamily: 'Poppins, sans-serif' }}
         >
           Accept & Import
         </Button>
@@ -142,8 +166,8 @@ const ShareConfirmationDialog = ({ open, onClose, documentType }) => {
         <Button
           variant="contained"
           fullWidth
-          onClick={handleClose}
-          sx={{ mt: 2, borderRadius: 7 }}
+          onClick={onClose}
+          sx={{ mt: 2 }}
         >
           Okay
         </Button>
@@ -154,7 +178,7 @@ const ShareConfirmationDialog = ({ open, onClose, documentType }) => {
   return (
     <Dialog
       open={open}
-      onClose={handleClose}
+      onClose={onClose}
       maxWidth="sm"
       fullWidth
       PaperProps={{
