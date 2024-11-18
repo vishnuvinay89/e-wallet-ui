@@ -32,7 +32,7 @@ const Login = () => {
       setTimer((prevTime) => prevTime - 1);
     }, 1000);
 
-    return () => clearInterval(interval); // Cleanup interval on component unmount
+    return () => clearInterval(interval);
   }, [timer]);
 
   // Format the timer as MM:SS
@@ -57,7 +57,6 @@ const Login = () => {
 
   // Phone number validation (10 digits, starts with a valid number)
   const validatePhoneNumber = (phoneNumber) => {
-    // Validate that phone number is exactly 10 digits
     const regex = /^\d{10}$/; 
     if (phoneNumber === '' || !regex.test(phoneNumber)) {
       setError((prevState) => ({
@@ -83,18 +82,16 @@ const Login = () => {
 
   // Resend OTP logic (reset the timer)
   const handleResendOtp = () => {
-    setOtp(''); // Clear OTP
-    setTimer(300); // Reset the timer to 5 minutes
-    setError((prevState) => ({ ...prevState, otp: '' })); // Clear OTP error
+    setOtp(''); 
+    setTimer(300);
+    setError((prevState) => ({ ...prevState, otp: '' }));
   };
 
   // Handle Login Button click
   const handleLogin = () => {
     // Basic validation before proceeding
     if (!error.phone && !error.otp && phone && otp.length === 6) {
-      // Prepend the +91 country code to the phone number
       const fullPhoneNumber = `+91${phone}`;
-      console.log('Phone Number:', fullPhoneNumber); // Use full phone number with country code
 
       // Proceed with login logic (Navigate or call API)
       navigate('/home');

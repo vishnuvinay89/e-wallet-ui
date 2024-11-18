@@ -14,56 +14,64 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
-const ShareConfirmationDialog = ({ open, onClose, documentType,docId, file }) => {
+const ShareConfirmationDialog = ({ open, onClose, documentType, docId, file }) => {
+  const navigate = useNavigate();
   const [checked, setChecked] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-    const apiUrl =import.meta.env.VITE_APP_API_URL;
-    let response;
-    const ssoId='2fc2411c-a0c9-404d-a13a-408241e81fe2';//actually get the sso id from the local storage
+  const [errorMessage, setErrorMessage] = useState(null); // State to track error message
+  const apiUrl = import.meta.env.VITE_APP_API_URL;
+  const ssoId = '2fc2411c-a0c9-404d-a13a-408241e81fe2'; // Get SSO ID from local storage or another source
+  
   const handleAccept = async () => {
     if (checked) {
       try {
+        let response;
 
         if (file) {
+          const formData = new FormData();
+          formData.append('sso_id', ssoId);
+          formData.append('doc_type', documentType);
+          formData.append('file', file);
 
-            const formData = new FormData();
-            formData.append('sso_id', ssoId);
-            formData.append('doc_type', documentType);
-            formData.append('file', file);
-        
+          // API request for upload
+          response = await axios.post(`${apiUrl}/user-docs`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+          });
+        } else {
+          const data = new URLSearchParams();
+          data.append('sso_id', ssoId);
+          data.append('doc_type', documentType);
+          data.append('doc_id', docId);
 
-            response = await axios.post(`${apiUrl}/user-docs`, formData, {
-              headers: {
-                'Content-Type': 'multipart/form-data',
-              },
-            });
-          } else {
+          // API request for fetch
+          response = await axios.post(`${apiUrl}/user-docs`, data.toString(), {
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          });
+        }
 
-            const data = new URLSearchParams();
-            data.append('sso_id', ssoId);
-            data.append('doc_type', documentType);
-            data.append('doc_id', docId);
-        
-            // Send the data without file
-            response = await axios.post(`${apiUrl}/user-docs`, data.toString(), {
-              headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-              },
-            });
-          }
-
+        // Handle successful upload/fetch
         setShowSuccess(true);
-        console.log('Upload successful:', response.data);
+
       } catch (error) {
-        console.error('Error during upload:', error);
-        alert('Failed to upload the document. Please try again.');
+        // In case of error, display the error message and set the error state
+        setErrorMessage(error.response?.data?.errorMessage || 'Failed to process the document. Please try again.');
       }
     }
   };
 
   const handleCheckboxChange = (e) => {
     setChecked(e.target.checked);
+  };
+
+  const handleErrorDialogClose = () => {
+    if (file) {
+      navigate('/upload');
+    } else {
+      navigate('/fetch');
+    }
+    onClose();
   };
 
   const ConfirmationContent = () => (
@@ -106,7 +114,7 @@ const ShareConfirmationDialog = ({ open, onClose, documentType,docId, file }) =>
           variant="outlined"
           fullWidth
           onClick={onClose}
-          sx={{ mr: 1, fontFamily: 'Poppins, sans-serif' }}
+          sx={{ mr: 1, fontFamily: 'Poppins, sans-serif', borderRadius: 7 }}
         >
           Deny
         </Button>
@@ -116,7 +124,7 @@ const ShareConfirmationDialog = ({ open, onClose, documentType,docId, file }) =>
           fullWidth
           onClick={handleAccept}
           disabled={!checked}
-          sx={{ fontFamily: 'Poppins, sans-serif' }}
+          sx={{ fontFamily: 'Poppins, sans-serif', borderRadius: 7 }}
         >
           Accept & Import
         </Button>
@@ -166,8 +174,33 @@ const ShareConfirmationDialog = ({ open, onClose, documentType,docId, file }) =>
         <Button
           variant="contained"
           fullWidth
-          onClick={onClose}
+          onClick={() => navigate('/home')}
           sx={{ mt: 2 }}
+        >
+          Okay
+        </Button>
+      </Box>
+    </DialogContent>
+  );
+
+  const ErrorContent = () => (
+    <DialogContent>
+      <Box sx={{
+        textAlign: 'center',
+        py: 4,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center'
+      }}>
+        <Typography variant="h6" sx={{ mb: 3, fontFamily: 'Poppins, sans-serif' }}>
+          Error: {errorMessage}
+        </Typography>
+
+        <Button
+          variant="contained"
+          fullWidth
+          onClick={handleErrorDialogClose}
+          sx={{ mt: 2 ,borderRadius:7}}
         >
           Okay
         </Button>
@@ -188,7 +221,7 @@ const ShareConfirmationDialog = ({ open, onClose, documentType,docId, file }) =>
         }
       }}
     >
-      {showSuccess ? <SuccessContent /> : <ConfirmationContent />}
+      {showSuccess ? <SuccessContent /> : errorMessage ? <ErrorContent /> : <ConfirmationContent />}
     </Dialog>
   );
 };

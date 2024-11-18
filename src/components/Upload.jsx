@@ -146,7 +146,7 @@ import {
           <Button
             variant="contained"
             fullWidth
-            sx={{ mt: 4 }}
+            sx={{ mt: 4 ,borderRadius:7}}
             startIcon={<UploadFileIcon />}
             onClick={handleUpload}
           >

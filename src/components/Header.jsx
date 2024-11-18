@@ -51,7 +51,7 @@ const Header = () => {
           sx={{
             m: 1,
             px:2,
-            minWidth: 60, // Adjust this based on your layout
+            minWidth: 30, // Adjust this based on your layout
             border: "2px solid black", // Add border around the FormControl
             borderRadius: "8px", // Optional: adds rounded corners
           }}
